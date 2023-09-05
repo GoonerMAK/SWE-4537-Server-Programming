@@ -1,0 +1,11 @@
+{
+  "name": "win32",
+  "timestamp": "2023-09-05T17:46:25.221Z",
+  "osInfo": {
+    "platform": "win32",
+    "release": "10.0.19045",
+    "architecture": "x64",
+    "totalMemory": 16976613376,
+    "freeMemory": 8753426432
+  }
+}

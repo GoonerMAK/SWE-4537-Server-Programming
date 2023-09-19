@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Page</title>
+</head>
+<body>
+    <h1>Registration</h1>
+    <form action="/register" method="POST" onsubmit="return validatePassword()">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br><br>
+        
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+        
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+        
+        <div id="passwordError" style="color: blue;"></div>
+        
+        <input type="submit" value="Register">
+    </form>
+
+    <script>
+        function validatePassword() {
+            var password = document.getElementById("password").value;
+            var hasUpperCase = /[A-Z]/.test(password);
+            var hasLowerCase = /[a-z]/.test(password);
+            var hasNumber = /\d/.test(password);
+    
+            if (!hasUpperCase || !hasLowerCase || !hasNumber || password.length < 8) {
+                var errorDiv = document.getElementById("passwordError");
+                errorDiv.textContent = "Your password doesn't meet the criteria.\n\n Password must meet the following criteria:\n" +
+                    "- At least 8 characters\n" +
+                    "- At least one uppercase letter\n" +
+                    "- At least one lowercase letter\n" +
+                    "- At least one number";
+                return false; // Prevent form submission
+            }
+
+            document.getElementById("passwordError").textContent = "";
+
+            return true; // Allow form submission
+        }
+    </script>
+</body>
+</html>

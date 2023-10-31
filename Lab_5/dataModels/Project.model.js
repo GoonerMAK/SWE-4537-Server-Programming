@@ -8,6 +8,10 @@ const ProjectSchema = new mongoose.Schema({
   
   user_id: {  type: String,  required: true,  },
 
+  images: {   type: [String],   default: [], },
+
+  audio: {  type: [String],  default: [], }
+
 });
 
 const Project = mongoose.model("Project", ProjectSchema);

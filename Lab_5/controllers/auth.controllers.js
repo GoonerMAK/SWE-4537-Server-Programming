@@ -199,21 +199,24 @@ const postProfileImage = async (req, res) => {
 
 const postMultipleImages = async (req, res) => {
   try {
-    if (!req.files) {
+    if (!req.files || req.files.length === 0) {
       return res.status(400).json({ message: 'No file provided' });
     }
 
-    const photo = req.files.map((file) => file.filename);
-
-    const userId = req.user.id
+    const userId = req.user.id;
     const user = await User.findById(userId);
-   
-    if (photo) {
-      user.images = photo
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
     }
+
+    const newImages  = req.files.map((file) => file.filename);
+   
+    user.images = user.images.concat(newImages);
+
     await user.save();
 
-    res.json({ message: 'Multiple images updated successfully' });
+    res.json({ message: 'Multiple images updated/appended successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -247,8 +250,9 @@ const postAudioFile = async (req, res) => {
 
 
     if (audio) {
-      user.audio = audio
+      user.audio.push(audio);     // Append
     }
+    
     await user.save();
 
     res.json({ message: 'Audio updated successfully' });

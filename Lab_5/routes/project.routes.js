@@ -5,8 +5,12 @@ const {
   updateProject,
   deleteProject,
   getProjectsByUser,
+  appendImagesToProject,
+  appendAudioToProject
 } = require("../controllers/project.controller");
 const ensureAuthenticated = require("../middlewares/auth.middleware");
+const {uploadProjectImage, uploadAudioFile} = require("../middlewares/media.middleware")
+
 
 // Create a new project
 router.post("/projects", ensureAuthenticated, createProject);
@@ -20,4 +24,10 @@ router.delete("/projects/:id", ensureAuthenticated, deleteProject);
 // Get a user's projects
 router.get("/projects/user", ensureAuthenticated, getProjectsByUser);
 
-module.exports = router;
+// Append images to a project
+router.post("/projects/:projectId/images", ensureAuthenticated, uploadProjectImage.array('images', 5), appendImagesToProject);
+
+// Append audio files to a project
+router.post("/projects/:projectId/audio", ensureAuthenticated, uploadAudioFile.array('audio', 5), appendAudioToProject);
+
+module.exports = router;  

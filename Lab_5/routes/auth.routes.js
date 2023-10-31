@@ -29,7 +29,7 @@ router.delete("/delete-profile/:id", deleteProfile);
 
 
 // upload images
-const {uploadProfileImage, uploadAudioFile} = require("../middlewares/image.middleware")
+const {uploadProfileImage, uploadAudioFile} = require("../middlewares/media.middleware")
 const {
   postProfileImage,postMultipleImages, getMultipleImages,
   postAudioFile,

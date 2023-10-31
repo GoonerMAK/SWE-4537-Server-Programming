@@ -4,7 +4,7 @@ const User = require("../dataModels/User.model");
 const createProject = async (req, res) => {
   try {
     // Extract project information from the request
-    const { title, description } = req.body;
+    const { title, description, images, audio } = req.body;
     const userEmail = req.user.email;             // Authenticated user
 
     console.log("Creating project:", title, description, "User:", userEmail);
@@ -19,6 +19,8 @@ const createProject = async (req, res) => {
       title,
       description,
       user_id: user._id,
+      images: images || [], 
+      audio: audio || [],
     });
 
     const savedProject = await project.save();
@@ -35,8 +37,7 @@ const createProject = async (req, res) => {
 const updateProject = async (req, res) => {
   try {
     // Extract project information from the request
-    const { id } = req.params;
-    const { title, description } = req.body;
+    const { id, title, description, images, audio } = req.body;
 
     console.log("Updating project:", id, "Title:", title);
 
@@ -66,6 +67,14 @@ const updateProject = async (req, res) => {
 
     if (description) {
       project.description = description;
+    }
+
+    if (images) {
+      project.images = images; 
+    }
+
+    if (audio) {
+      project.audio = audio; 
     }
 
     const updatedProject = await project.save();
@@ -117,6 +126,7 @@ const deleteProject = async (req, res) => {
   }
 };
 
+
 const getProjectsByUser = async (req, res) => {
     try {
 
@@ -138,9 +148,67 @@ const getProjectsByUser = async (req, res) => {
 };
 
 
+const appendImagesToProject = async (req, res) => {
+  const { projectId } = req.params;
+  const { files } = req;
+  const authenticatedUser = req.user;
+
+  try {
+    const project = await Project.findById(projectId);
+
+    if (!project) {
+      throw new Error("Project not found");
+    }
+
+    if (project.user_id.toString() !== authenticatedUser._id.toString()) {
+      return res.status(403).json({ error: 'You do not have permission to update this project' });
+    }
+
+    // Append the new images to the existing images array
+    project.images = project.images.concat(files.map((file) => file.filename));
+
+    await project.save();
+
+    res.json({ message: "Images appended to the project successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+const appendAudioToProject = async (req, res) => {
+  const { projectId } = req.params;
+  const { files } = req;
+  const authenticatedUser = req.user;
+
+  try {
+    const project = await Project.findById(projectId);
+
+    if (!project) {
+      throw new Error("Project not found");
+    }
+
+    if (project.user_id.toString() !== authenticatedUser._id.toString()) {
+      return res.status(403).json({ error: 'You do not have permission to update this project' });
+    }
+
+    // Append the new audio files to the existing audio array
+    project.audio = project.audio.concat(files.map((file) => file.filename));
+
+    await project.save();
+
+    res.json({ message: "Audio files appended to the project successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 module.exports = {
   createProject,
   updateProject,
   deleteProject,
   getProjectsByUser,
+  appendImagesToProject,
+  appendAudioToProject,
 };

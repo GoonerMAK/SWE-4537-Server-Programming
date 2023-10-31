@@ -1,21 +1,26 @@
 const Project = require("../dataModels/Project.model");
+const User = require("../dataModels/User.model");
 
 const createProject = async (req, res) => {
   try {
     // Extract project information from the request
     const { title, description } = req.body;
-    const owner = req.user._id; 
+    const userEmail = req.user.email;             // Authenticated user
 
-    console.log("Creating project:", title, description, "Owner:", owner);
+    console.log("Creating project:", title, description, "User:", userEmail);
 
-    // Create a new project
+    const user = await User.findOne({ email: userEmail });        // Find the user by email
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
     const project = new Project({
       title,
       description,
-      owner,
+      user_id: user._id,
     });
 
-    // Save the project to the database
     const savedProject = await project.save();
 
     console.log("Project created:", savedProject);
@@ -30,16 +35,28 @@ const createProject = async (req, res) => {
 const updateProject = async (req, res) => {
   try {
     // Extract project information from the request
+    const { id } = req.params;
     const { title, description } = req.body;
-    const projectId = req.params.id;
 
-    console.log("Updating project:", projectId, "Title:", title);
+    console.log("Updating project:", id, "Title:", title);
 
-    // Find the project by ID
-    const project = await Project.findById(projectId);
+    const project = await Project.findById(id);       // Find the project by ID
 
     if (!project) {
       return res.status(404).json({ error: "Project not found" });
+    }
+
+    const userEmail = req.user.email;      // Authenticated user
+
+    const user = await User.findOne({ email: userEmail });        // Find the user by email
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check if the project belongs to the authenticated user
+    if (project.user_id.toString() !== user._id.toString()) {
+      return res.status(403).json({ error: 'You do not have permission to update this project' });
     }
 
     // Update project properties
@@ -51,7 +68,6 @@ const updateProject = async (req, res) => {
       project.description = description;
     }
 
-    // Save the updated project
     const updatedProject = await project.save();
 
     console.log("Project updated:", updatedProject);
@@ -66,26 +82,33 @@ const updateProject = async (req, res) => {
 
 const deleteProject = async (req, res) => {
   try {
-    const projectId = req.params.id;
+    const { id } = req.params;
 
-    console.log("Deleting project:", projectId);
+    console.log("Deleting project:", id);
 
     // Find the project by ID
-    const project = await Project.findById(projectId);
+    const project = await Project.findById(id);
 
     if (!project) {
       return res.status(404).json({ error: "Project not found" });
     }
 
-    // Check if the user is authorized to delete the project
-    if (project.owner.toString() !== req.user._id) {
-      return res.status(403).json({ error: "You are not authorized to delete this project" });
+    const userEmail = req.user.email;      // Authenticated user
+
+    const user = await User.findOne({ email: userEmail });        // Find the user by email
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    // Delete the project
-    await project.deleteOne();
+    // Check if the project belongs to the authenticated user
+    if (project.user_id.toString() !== user._id.toString()) {
+      return res.status(403).json({ error: 'You do not have permission to delete this project' });
+    }
 
-    console.log("Project deleted:", projectId);
+    await project.deleteOne();            // Delete
+
+    console.log("Project deleted:", id);
 
     res.json({ message: "Project deleted successfully" });
   } catch (error) {
@@ -96,10 +119,17 @@ const deleteProject = async (req, res) => {
 
 const getProjectsByUser = async (req, res) => {
     try {
-      // Fetch projects by the user's ID
-      const userId = req.user._id; // Assuming you have user information in req.user after authentication
-      const projects = await Project.find({ owner: userId });
-  
+
+      const userEmail = req.user.email;       // Authenticated user
+
+      const user = await User.findOne({ email: userEmail });      // Find the user by email
+
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const projects = await Project.find({ user_id: user._id });
+
       res.json(projects);
     } catch (error) {
       console.error("Error fetching projects:", error);

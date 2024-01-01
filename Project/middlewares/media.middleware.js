@@ -9,7 +9,7 @@ const fileFilter = (req, file, cb) => {
   } else cb(null, false);
 };
 
-const projectImage = multer.diskStorage({
+const Image = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads");
   },
@@ -27,10 +27,6 @@ const profileImage = multer.diskStorage({
   },
 });
 
-const uploadProfileImage = multer({ storage: profileImage, fileFilter });
-
-const uploadProjectImage = multer({ storage: projectImage, fileFilter });
-
 const audioStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads");
@@ -40,9 +36,11 @@ const audioStorage = multer.diskStorage({
   },
 });
 
-const uploadAudioFile = multer({
-  preservePath: true,
-  storage: audioStorage,
-});
 
-module.exports = { uploadProjectImage, uploadProfileImage, uploadAudioFile };
+const uploadProfileImage = multer({ storage: profileImage, fileFilter });
+
+const uploadImage = multer({ storage: Image, fileFilter });
+
+const uploadAudioFile = multer({  preservePath: true, storage: audioStorage, });
+
+module.exports = { uploadImage, uploadProfileImage, uploadAudioFile };

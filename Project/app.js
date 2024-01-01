@@ -45,6 +45,8 @@ app.use(mediaRoutes);
 const projectRoutes = require("./routes/project.routes");
 app.use(projectRoutes);
 
+const postRoutes = require("./routes/post.routes");
+app.use(postRoutes);
 
 // Welcome route
 const ensureAuthenticated = require("./middlewares/auth.middleware");

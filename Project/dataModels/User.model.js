@@ -10,15 +10,11 @@ const UserSchema = new mongoose.Schema({
   
   google_id: { type: String,  unique: true, },
 
-  profession: {  type: String, },
+  elo_rating: {  type: String, },
   
-  hobby: {   type: String, },
+  chess_title: {   type: String, },
   
   profile_image: { type: String, default:'',   },
-
-  images: {  type: [String],  default:[],  },
-
-  audio: { type: String,    default:'',   },
 
 });
 

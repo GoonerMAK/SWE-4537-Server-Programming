@@ -229,11 +229,14 @@ const appendCommentToPost = async (req, res) => {
         return res.status(403).json({ error: 'You do not have permission to update this post' });
       }
   
-      // Add a new comment object to the comments array
+        // Add a new comment object to the comments array
         post.comments.push({
             user_id: authenticatedUser._id,
             user_name: authenticatedUser.name, 
             comment,
+            images: [], 
+            audios: [],  
+            chessPGNs: [], 
         });
 
   
@@ -314,6 +317,7 @@ const editCommentOfPost = async (req, res) => {
 };
 
 
+
 const getAllCommentsOfPost = async (req, res) => {
     const { postID } = req.params;
 
@@ -333,6 +337,521 @@ const getAllCommentsOfPost = async (req, res) => {
 };
 
 
+const appendImagesToComment = async (req, res) => {
+    const { postID, commentID } = req.params;
+    const { files } = req;
+    const authenticatedUser = req.user;
+
+    try {
+        const post = await Post.findById(postID);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const commentIndex = post.comments.findIndex(comment => comment._id.toString() === commentID);
+
+        if (commentIndex === -1) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        const comment = post.comments[commentIndex];
+
+        if (comment.user_id.toString() !== authenticatedUser._id.toString()) {
+            return res.status(403).json({ error: 'You do not have permission to update this comment' });
+        }
+
+        // Append the new images to the existing images array in the comment
+        comment.images = comment.images.concat(files.map((file) => file.filename));
+
+        await post.save();
+
+        res.json({ message: "Images appended to the comment successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+const appendAudiosToComment = async (req, res) => {
+    const { postID, commentID } = req.params;
+    const { files } = req;
+    const authenticatedUser = req.user;
+
+    try {
+        const post = await Post.findById(postID);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const commentIndex = post.comments.findIndex(comment => comment._id.toString() === commentID);
+
+        if (commentIndex === -1) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        const comment = post.comments[commentIndex];
+
+        if (comment.user_id.toString() !== authenticatedUser._id.toString()) {
+            return res.status(403).json({ error: 'You do not have permission to update this comment' });
+        }
+
+        // Append the new audio files to the existing audio array in the comment
+        comment.audios = comment.audios.concat(files.map((file) => file.filename));
+
+        await post.save();
+
+        res.json({ message: "Audio files appended to the comment successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+const deleteAllImagesFromPost = async (req, res) => {
+    const { postID } = req.params;
+    const authenticatedUser = req.user;
+
+    try {
+        const post = await Post.findById(postID);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        if (post.user_id.toString() !== authenticatedUser._id.toString()) {
+            return res.status(403).json({ error: 'You do not have permission to update this post' });
+        }
+
+        // Remove all images from the post
+        post.images = [];
+
+        await post.save();
+
+        res.json({ message: "All images removed from the post successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+const deleteAllAudiosFromPost = async (req, res) => {
+    const { postID } = req.params;
+    const authenticatedUser = req.user;
+
+    try {
+        const post = await Post.findById(postID);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        if (post.user_id.toString() !== authenticatedUser._id.toString()) {
+            return res.status(403).json({ error: 'You do not have permission to update this post' });
+        }
+
+        // Remove all audio files from the post
+        post.audios = [];
+
+        await post.save();
+
+        res.json({ message: "All audio files removed from the post successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+const deleteAllImagesFromComment = async (req, res) => {
+    const { postID, commentID } = req.params;
+    const authenticatedUser = req.user;
+
+    try {
+        const post = await Post.findById(postID);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const commentIndex = post.comments.findIndex(comment => comment._id.toString() === commentID);
+
+        if (commentIndex === -1) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        const comment = post.comments[commentIndex];
+
+        if (comment.user_id.toString() !== authenticatedUser._id.toString()) {
+            return res.status(403).json({ error: 'You do not have permission to update this comment' });
+        }
+
+        // Remove all images from the comment
+        comment.images = [];
+
+        await post.save();
+
+        res.json({ message: "All images removed from the comment successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+const deleteAllAudiosFromComment = async (req, res) => {
+    const { postID, commentID } = req.params;
+    const authenticatedUser = req.user;
+
+    try {
+        const post = await Post.findById(postID);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const commentIndex = post.comments.findIndex(comment => comment._id.toString() === commentID);
+
+        if (commentIndex === -1) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        const comment = post.comments[commentIndex];
+
+        if (comment.user_id.toString() !== authenticatedUser._id.toString()) {
+            return res.status(403).json({ error: 'You do not have permission to update this comment' });
+        }
+
+        // Remove all audio files from the comment
+        comment.audios = [];
+
+        await post.save();
+
+        res.json({ message: "All audio files removed from the comment successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+
+const appendReplyToComment = async (req, res) => {
+    const { postID, commentID } = req.params;
+    const authenticatedUser = req.user;
+    const { reply } = req.body;
+
+    try {
+        const post = await Post.findById(postID);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const commentIndex = post.comments.findIndex(comment => comment._id.toString() === commentID);
+
+        if (commentIndex === -1) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        const comment = post.comments[commentIndex];
+
+        // Add a new reply object to the replies array in the comment
+        comment.replies.push({
+            user_id: authenticatedUser._id,
+            user_name: authenticatedUser.name,
+            reply,
+            images: [],
+            audios: [],
+            chessPGNs: [],
+        });
+
+        await post.save();
+
+        res.json({ message: "Reply added to the comment successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const deleteReplyFromComment = async (req, res) => {
+    const { postID, commentID, replyID } = req.params;
+    const authenticatedUser = req.user;
+
+    try {
+        const post = await Post.findById(postID);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const commentIndex = post.comments.findIndex(comment => comment._id.toString() === commentID);
+
+        if (commentIndex === -1) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        const comment = post.comments[commentIndex];
+
+        const replyIndex = comment.replies.findIndex(reply => reply._id.toString() === replyID);
+
+        if (replyIndex === -1) {
+            return res.status(404).json({ error: 'Reply not found' });
+        }
+
+        const reply = comment.replies[replyIndex];
+
+        if (reply.user_id.toString() !== authenticatedUser._id.toString()) {
+            return res.status(403).json({ error: 'You do not have permission to delete this reply' });
+        }
+
+        // Remove the reply from the replies array in the comment
+        comment.replies.splice(replyIndex, 1);
+
+        await post.save();
+
+        res.json({ message: "Reply deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const editReplyOfComment = async (req, res) => {
+    const { postID, commentID, replyID } = req.params;
+    const authenticatedUser = req.user;
+    const { reply } = req.body;
+
+    try {
+        const post = await Post.findById(postID);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const commentIndex = post.comments.findIndex(comment => comment._id.toString() === commentID);
+
+        if (commentIndex === -1) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        const comment = post.comments[commentIndex];
+
+        const replyIndex = comment.replies.findIndex(reply => reply._id.toString() === replyID);
+
+        if (replyIndex === -1) {
+            return res.status(404).json({ error: 'Reply not found' });
+        }
+
+        const oldReply = comment.replies[replyIndex];
+
+        if (oldReply.user_id.toString() !== authenticatedUser._id.toString()) {
+            return res.status(403).json({ error: 'You do not have permission to edit this reply' });
+        }
+
+        oldReply.reply = reply;
+
+        await post.save();
+
+        res.json({ message: "Reply edited successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const getAllRepliesOfComment = async (req, res) => {
+    const { postID, commentID } = req.params;
+
+    try {
+        const post = await Post.findById(postID);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const commentIndex = post.comments.findIndex(comment => comment._id.toString() === commentID);
+
+        if (commentIndex === -1) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        const comment = post.comments[commentIndex];
+
+        const replies = comment.replies;
+
+        res.json(replies);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const appendImagesToReply = async (req, res) => {
+    const { postID, commentID, replyID } = req.params;
+    const { files } = req;
+    const authenticatedUser = req.user;
+
+    try {
+        const post = await Post.findById(postID);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const commentIndex = post.comments.findIndex(comment => comment._id.toString() === commentID);
+
+        if (commentIndex === -1) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        const comment = post.comments[commentIndex];
+
+        const replyIndex = comment.replies.findIndex(reply => reply._id.toString() === replyID);
+
+        if (replyIndex === -1) {
+            return res.status(404).json({ error: 'Reply not found' });
+        }
+
+        const reply = comment.replies[replyIndex];
+
+        if (reply.user_id.toString() !== authenticatedUser._id.toString()) {
+            return res.status(403).json({ error: 'You do not have permission to update images for this reply' });
+        }
+
+        // Append the new images to the existing images array in the reply
+        reply.images = reply.images.concat(files.map((file) => file.filename));
+
+        await post.save();
+
+        res.json({ message: "Images appended to the reply successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const appendAudiosToReply = async (req, res) => {
+    const { postID, commentID, replyID } = req.params;
+    const { files } = req;
+    const authenticatedUser = req.user;
+
+    try {
+        const post = await Post.findById(postID);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const commentIndex = post.comments.findIndex(comment => comment._id.toString() === commentID);
+
+        if (commentIndex === -1) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        const comment = post.comments[commentIndex];
+
+        const replyIndex = comment.replies.findIndex(reply => reply._id.toString() === replyID);
+
+        if (replyIndex === -1) {
+            return res.status(404).json({ error: 'Reply not found' });
+        }
+
+        const reply = comment.replies[replyIndex];
+
+        if (reply.user_id.toString() !== authenticatedUser._id.toString()) {
+            return res.status(403).json({ error: 'You do not have permission to update audio files for this reply' });
+        }
+
+        // Append the new audio files to the existing audio array in the reply
+        reply.audios = reply.audios.concat(files.map((file) => file.filename));
+
+        await post.save();
+
+        res.json({ message: "Audio files appended to the reply successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const deleteAllImagesFromReply = async (req, res) => {
+    const { postID, commentID, replyID } = req.params;
+    const authenticatedUser = req.user;
+
+    try {
+        const post = await Post.findById(postID);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const commentIndex = post.comments.findIndex(comment => comment._id.toString() === commentID);
+
+        if (commentIndex === -1) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        const comment = post.comments[commentIndex];
+
+        const replyIndex = comment.replies.findIndex(reply => reply._id.toString() === replyID);
+
+        if (replyIndex === -1) {
+            return res.status(404).json({ error: 'Reply not found' });
+        }
+
+        const reply = comment.replies[replyIndex];
+
+        if (reply.user_id.toString() !== authenticatedUser._id.toString()) {
+            return res.status(403).json({ error: 'You do not have permission to delete images from this reply' });
+        }
+
+        // Remove all images from the reply
+        reply.images = [];
+
+        await post.save();
+
+        res.json({ message: "All images deleted from the reply successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const deleteAllAudiosFromReply = async (req, res) => {
+    const { postID, commentID, replyID } = req.params;
+    const authenticatedUser = req.user;
+
+    try {
+        const post = await Post.findById(postID);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const commentIndex = post.comments.findIndex(comment => comment._id.toString() === commentID);
+
+        if (commentIndex === -1) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        const comment = post.comments[commentIndex];
+
+        const replyIndex = comment.replies.findIndex(reply => reply._id.toString() === replyID);
+
+        if (replyIndex === -1) {
+            return res.status(404).json({ error: 'Reply not found' });
+        }
+
+        const reply = comment.replies[replyIndex];
+
+        if (reply.user_id.toString() !== authenticatedUser._id.toString()) {
+            return res.status(403).json({ error: 'You do not have permission to delete audio files from this reply' });
+        }
+
+        // Remove all audio files from the reply
+        reply.audios = [];
+
+        await post.save();
+
+        res.json({ message: "All audio files deleted from the reply successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 
 module.exports = {
     getCreatePostPage,
@@ -348,4 +867,18 @@ module.exports = {
     deleteCommentFromPost,
     editCommentOfPost,
     getAllCommentsOfPost,
+    appendImagesToComment,
+    appendAudiosToComment,
+    deleteAllImagesFromPost,
+    deleteAllAudiosFromPost,
+    deleteAllImagesFromComment,
+    deleteAllAudiosFromComment,
+    appendReplyToComment,
+    deleteReplyFromComment,
+    editReplyOfComment,
+    getAllRepliesOfComment,
+    appendImagesToReply,
+    appendAudiosToReply,
+    deleteAllImagesFromReply,
+    deleteAllAudiosFromReply,
 };

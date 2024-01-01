@@ -10,6 +10,7 @@ const {
     deletePost,
     appendImagesToPost,
     appendAudiosToPost,
+    appendPgnsToPost,
     appendCommentToPost,
     deleteCommentFromPost,
     editCommentOfPost,
@@ -30,7 +31,7 @@ const {
     deleteAllAudiosFromReply,
 } = require("../controllers/post.controller");
 const ensureAuthenticated = require("../middlewares/auth.middleware");
-const {uploadImage, uploadAudioFile} = require("../middlewares/media.middleware")
+const {uploadImage, uploadAudioFile, uploadPgnFile} = require("../middlewares/media.middleware")
 
 
 router.get("/post/:postID", ensureAuthenticated, getPostById);
@@ -50,6 +51,8 @@ router.delete("/post/:postID", ensureAuthenticated, deletePost);
 router.post("/post/:postID/images", ensureAuthenticated, uploadImage.array('images', 5), appendImagesToPost);
 
 router.post("/post/:postID/audios", ensureAuthenticated, uploadAudioFile.array('audios', 5), appendAudiosToPost);
+
+router.post("/post/:postID/pgns", ensureAuthenticated, uploadPgnFile.single('pgn'), appendPgnsToPost);
 
 router.delete('/post/:postID/images', ensureAuthenticated, deleteAllImagesFromPost);
 

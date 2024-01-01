@@ -1,5 +1,8 @@
 const User = require("../dataModels/User.model");
+const fs = require("fs");
 const path = require("path");
+const Post = require("../dataModels/Post.model");
+
 
 const postProfileImage = async (req, res) => {
     try {
@@ -90,11 +93,31 @@ const postProfileImage = async (req, res) => {
     }
   };
   
+
+  const postPgnFile = async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file provided' });
+      }
+  
+      const pgnFilePath = req.file.path;
+      const pgnFileContent = fs.readFileSync(pgnFilePath, 'utf-8');
+      const base64EncodedPgn = Buffer.from(pgnFileContent).toString('base64');
+  
+      // Implementation needed
+  
+      res.json({ message: 'PGN file processed successfully' });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
+
   
 module.exports = {
     postProfileImage,
     postMultipleImages,
     getMultipleImages,
     postAudioFile, 
+    postPgnFile,
   };
   

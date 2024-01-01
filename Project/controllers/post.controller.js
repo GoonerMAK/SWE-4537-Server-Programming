@@ -213,6 +213,46 @@ const appendAudiosToPost = async (req, res) => {
 };
 
 
+const appendPgnsToPost = async (req, res) => {
+    const { postID } = req.params;
+    const { files } = req;
+    const authenticatedUser = req.user;
+  
+    try {
+      const post = await Post.findById(postID);
+  
+      if (!post) {
+        throw new Error("post not found");
+      }
+  
+      if (post.user_id.toString() !== authenticatedUser._id.toString()) {
+        return res.status(403).json({ error: 'You do not have permission to update this post' });
+      }
+
+    const base64EncodedPgns = files.map((file) => 
+    {
+        const pgnFilePath = file.path;
+        const pgnFileContent = fs.readFileSync(pgnFilePath, 'utf-8');
+        return Buffer.from(pgnFileContent).toString('base64');
+    });
+
+        post.chessPGNs = post.chessPGNs.concat(base64EncodedPgns);
+
+        files.forEach((file) => {
+            const pgnFilePath = file.path;
+            fs.unlinkSync(pgnFilePath);
+        });
+  
+      await post.save();
+  
+      res.json({ message: "Chess PGN file appended to the post successfully" });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+};
+
+
+
 const appendCommentToPost = async (req, res) => {
     const { postID } = req.params;
     const authenticatedUser = req.user;
@@ -863,6 +903,7 @@ module.exports = {
     deletePost,
     appendImagesToPost,
     appendAudiosToPost,
+    appendPgnsToPost,
     appendCommentToPost,
     deleteCommentFromPost,
     editCommentOfPost,

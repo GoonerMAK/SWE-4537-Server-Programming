@@ -10,7 +10,7 @@ require("./config/passport")(passport);
 app.use(flash());
 app.use(
   session({
-    secret:"secret",
+    secret:process.env.SESSION_SECRET,
     resave: false,  // we can resave the session if nothing is change
     saveUninitialized: false,  // we can save empty value
   })
@@ -39,6 +39,9 @@ app.use(cors({
 const routes = require("./routes/auth.routes");
 app.use(routes);
 
+const mediaRoutes = require("./routes/media.routes");
+app.use(mediaRoutes);
+
 const projectRoutes = require("./routes/project.routes");
 app.use(projectRoutes);
 
@@ -62,7 +65,7 @@ mongoose
   })
   .catch((error) => {
     console.log(error);
-  });
+});
 
 
 module.exports = app;

@@ -25,7 +25,7 @@ const getCreatePostPage = async (req, res) => {
 
 // Create a new post
 const createPost = async (req, res) => {
-    const { title, description, images, audios, chessPGNs } = req.body;
+    const { title, description, images, audios, chessPGNs, comment } = req.body;
   
     try {
       const newPost = new Post({
@@ -35,6 +35,13 @@ const createPost = async (req, res) => {
         images,
         audios,
         chessPGNs,
+        comments: [
+            {
+                user_id: null,
+                user_name: null,
+                comment
+            }
+        ]
       });
   
       const savedPost = await newPost.save();
@@ -53,6 +60,22 @@ const getAllPosts = async (req, res) => {
       res.json(posts);
     } catch (error) {
       res.status(500).json({ error: error.message });
+    }
+};
+  
+// Get all posts
+const getAllPostsPage = async (req, res) => {
+    try {
+        const filePath = path.join(__dirname, '..', 'views', 'allPosts.html');
+        
+        // Check if the file exists
+        if (fs.existsSync(filePath)) {
+            res.sendFile(filePath);
+        } else {
+            res.status(404).json({ error: 'HTML file not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 };
   
@@ -78,7 +101,7 @@ const getPostById = async (req, res) => {
   
 // Update a post by ID
 const updatePost = async (req, res) => {
-    const { title, description, images,  audios, chessPGNs } = req.body;
+    const { title, description, images,  audios, chessPGNs, comments } = req.body;
     const { postID } = req.params;
 
     try {
@@ -90,6 +113,7 @@ const updatePost = async (req, res) => {
           images,
           audios,
           chessPGNs,
+          comments,
         },
         { new: true }
       );
@@ -186,16 +210,142 @@ const appendAudiosToPost = async (req, res) => {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  };
+};
+
+
+const appendCommentToPost = async (req, res) => {
+    const { postID } = req.params;
+    const authenticatedUser = req.user;
+    const { comment } = req.body;
+  
+    try {
+      const post = await Post.findById(postID);
+  
+      if (!post) {
+        throw new Error("post not found");
+      }
+  
+      if (post.user_id.toString() !== authenticatedUser._id.toString()) {
+        return res.status(403).json({ error: 'You do not have permission to update this post' });
+      }
+  
+      // Add a new comment object to the comments array
+        post.comments.push({
+            user_id: authenticatedUser._id,
+            user_name: authenticatedUser.name, 
+            comment,
+        });
+
+  
+      await post.save();
+  
+      res.json({ message: "Comment posted to the post successfully" });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+};
+
+
+const deleteCommentFromPost = async (req, res) => {
+    const { postID, commentID } = req.params;
+    const authenticatedUser = req.user;
+
+    try {
+        const post = await Post.findById(postID);
+
+        if (!post) {
+            throw new Error("Post not found");
+        }
+
+        const commentIndex = post.comments.findIndex(comment => comment._id.toString() === commentID);
+
+        if (commentIndex === -1) {
+            return res.status(404).json({ error: "Comment not found" });
+        }
+
+        const comment = post.comments[commentIndex];
+
+        if (comment.user_id.toString() !== authenticatedUser._id.toString()) {
+            return res.status(403).json({ error: 'You do not have permission to delete this comment' });
+        }
+
+        // Remove the comment from the comments array
+        post.comments.splice(commentIndex, 1);
+
+        await post.save();
+
+        res.json({ message: "Comment deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+const editCommentOfPost = async (req, res) => {
+    const { postID, commentID } = req.params;
+    const authenticatedUser = req.user;
+    const { comment } = req.body;
+
+    try {
+        const post = await Post.findById(postID);
+
+        if (!post) {
+            throw new Error("Post not found");
+        }
+
+        const oldComment = post.comments.find(c => c._id.toString() === commentID);
+
+        if (!oldComment) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        if (oldComment.user_id.toString() !== authenticatedUser._id.toString()) {
+            return res.status(403).json({ error: 'You do not have permission to edit this comment' });
+        }
+
+        oldComment.comment = comment;
+        
+        await post.save();
+
+        res.json({ message: "Comment edited successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+const getAllCommentsOfPost = async (req, res) => {
+    const { postID } = req.params;
+
+    try {
+        const post = await Post.findById(postID);
+
+        if (!post) {
+            throw new Error("Post not found");
+        }
+
+        const comments = post.comments;
+
+        res.json(comments);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 
 
 module.exports = {
     getCreatePostPage,
     getAllPosts,
+    getAllPostsPage,
     getPostById,
     createPost,
     updatePost,
     deletePost,
     appendImagesToPost,
     appendAudiosToPost,
+    appendCommentToPost,
+    deleteCommentFromPost,
+    editCommentOfPost,
+    getAllCommentsOfPost,
 };

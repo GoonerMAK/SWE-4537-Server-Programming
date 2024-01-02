@@ -577,7 +577,7 @@ const deleteAllAudiosFromComment = async (req, res) => {
 const appendReplyToComment = async (req, res) => {
     const { postID, commentID } = req.params;
     const authenticatedUser = req.user;
-    const { reply } = req.body;
+    const { reply, images, audios } = req.body;
 
     try {
         const post = await Post.findById(postID);
@@ -599,8 +599,8 @@ const appendReplyToComment = async (req, res) => {
             user_id: authenticatedUser._id,
             user_name: authenticatedUser.name,
             reply,
-            images: [],
-            audios: [],
+            images: [images],
+            audios: [audios],
             chessPGNs: [],
         });
 
@@ -611,6 +611,7 @@ const appendReplyToComment = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 const deleteReplyFromComment = async (req, res) => {
     const { postID, commentID, replyID } = req.params;
@@ -653,6 +654,7 @@ const deleteReplyFromComment = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 const editReplyOfComment = async (req, res) => {
     const { postID, commentID, replyID } = req.params;

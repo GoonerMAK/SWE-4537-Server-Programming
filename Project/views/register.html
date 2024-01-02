@@ -16,13 +16,37 @@
         <input type="email" id="email" name="email" required><br><br>
         
         <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br><br>
-        
+        <input type="password" id="password" name="password" required oninput="checkPasswordStrength()"><br>
+        <div id="password-strength"></div><br>
+
         <input type="submit" value="Register">
     </form>
 
     <br>
     <button onclick="window.location.href='/login'">Login</a></button>
+
+    <script>
+
+        function checkPasswordStrength() {
+            const passwordInput = document.getElementById('password');
+            const passwordStrengthDiv = document.getElementById('password-strength');
+            const password = passwordInput.value;
+
+            const strongRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})");
+            const mediumRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{6,})");
+
+            if (strongRegex.test(password)) {
+                passwordStrengthDiv.innerHTML = 'Password Strength: Strong';
+                passwordStrengthDiv.style.color = 'green';
+            } else if (mediumRegex.test(password)) {
+                passwordStrengthDiv.innerHTML = 'Password Strength: Medium';
+                passwordStrengthDiv.style.color = 'orange';
+            } else {
+                passwordStrengthDiv.innerHTML = 'Password Strength: Weak';
+                passwordStrengthDiv.style.color = 'red';
+            }
+        }
+    </script>
 
 </body>
 </html>

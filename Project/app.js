@@ -23,6 +23,11 @@ app.use(passport.session());
 // To store image/files
 app.use(express.static('./uploads'))
 
+
+const loggerMiddleware = require('./middlewares/logger.middleware');
+app.use(loggerMiddleware);
+
+
 //Body Parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -44,6 +49,9 @@ app.use(mediaRoutes);
 
 const projectRoutes = require("./routes/project.routes");
 app.use(projectRoutes);
+
+const userRoutes = require("./routes/user.routes");
+app.use(userRoutes);
 
 const postRoutes = require("./routes/post.routes");
 app.use(postRoutes);

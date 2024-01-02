@@ -10,11 +10,11 @@ const UserSchema = new mongoose.Schema({
   
   google_id: { type: String,  unique: true, },
 
-  elo_rating: {  type: String, },
+  elo_rating: {  type: Number, },
   
-  chess_title: {   type: String, },
+  chess_title: {  type: String, },
   
-  profile_image: { type: String, default:'',   },
+  images: {   type: String,   },
 
 });
 
